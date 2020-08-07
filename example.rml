@@ -1,0 +1,6 @@
+$input grade // 3 prompt "Question 1 grade" to q1grade
+$input grade // 3 prompt "Question 2 grade" to q2grade if q1grade > 0 else 0 // 3
+$let total = q1grade + q2grade
+Your grade: ${total}
+Question 1: ${q1grade}
+Question 2: ${q2grade}

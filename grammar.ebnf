@@ -1,28 +1,30 @@
 (*
-Within a line, whitespace may not come before a statement
-All statements and expressions may have any kind of enclosed whitespace
+A statement marker must be at the start of line
+All statements and expressions may not have newlines in them, but may have other whitespace
+Blank lines between statements and lines are ignored, even when newline collapse is false
 *)
 
-file = { statement }, { line } ;
+file = { statement | comment }, { line } ;
 line = { plain_text | expression }, ? newline ? ;
 
 plain_text = ? any text not including "$" but allowing "$$" ? ;
 
+comment = "$#", ? anything excluding newline ? ;
 statement = "$", statement_body ;
 statement_body = "config", "newline_collapse", boolean_literal
-               | "input", input_spec, [ "prompt", string_literal ], "to", identifier, [ "if", expression_body, "else", expression_body ]
+               | "input", type, [ "prompt", expression ], "to", identifier, [ "if", expression_body, "else", expression_body ]
                | "let", identifier, "=", expression_body
 ;
 
 expression = "${", expression_body "}" ;
 expression_body = logical_expression
-                | logical_expression, "?", expression, ":", logical_expression
+                | logical_expression, "?", expression_body, ":", expression_body
 ;
 logical_expression = equality_expression, { ( "&&" | "||" ), equality_expression } ;
 equality_expression = comparison_expression, { ( "==" | "!=" ), comparison_expression } ;
 comparison_expression = addition_expression, { ( "<" | ">" | "<=" | ">=" ), addition_expression } ;
 addition_expression = multiplication_expression, { ( "+" | "-" ), multiplication_expression } ;
-multiplication_expression = prefix_expression, { ( "*" | "/" | "%" ), prefix_expression } ;
+multiplication_expression = prefix_expression, { ( "*" | "/" | "%" | "//" ), prefix_expression } ;
 prefix_expression = primary_expression
                   | "-", primary_expression
                   | "!", primary_expression
@@ -31,7 +33,6 @@ primary_expression = identifier
                    | boolean_literal
                    | number_literal
                    | string_literal
-                   | grade_literal
                    | "(", expression_body, ")"
                    | "floor", "(", expression_body, ")"
                    | "ceil", "(", expression_body, ")"
@@ -43,10 +44,9 @@ identifier = ? any valid C identifier excluding keywords ?;
 type = "boolean"
      | "number"
      | "string"
-     | "grade", "(", number_literal, ")"
+     | "grade", "//", expression
 ;
 
 boolean_literal = "true" | "false" ;
-number_literal = ? any decimal number possibly with sign ? ;
+number_literal = ? any decimal number ? ;
 string_literal = ? any quote-enclosed string literal possibly involving the escape sequences \n, \t, \" and \\ ? ;
-grade_literal = number_literal "//" number_literal ;
