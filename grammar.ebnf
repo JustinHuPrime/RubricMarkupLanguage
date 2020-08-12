@@ -15,6 +15,10 @@ statement_body = "config", "newline_collapse", boolean_literal
                | "input", type, [ "prompt", expression ], "to", identifier, [ "if", expression_body, "else", expression_body ]
                | "let", identifier, "=", expression_body
 ;
+(*
+TODO: change input stmt to
+"input", [ "if", expression_body, "else", expression_body ], type, [ "prompt", expression ], "to", identifier
+*)
 
 expression = "${", expression_body "}" ;
 expression_body = logical_expression
@@ -37,6 +41,8 @@ primary_expression = identifier
                    | "floor", "(", expression_body, ")"
                    | "ceil", "(", expression_body, ")"
                    | "round", "(", expression_body, ")"
+                   | "to_string", "(", expression_body, ")"
+                   | "to_number", "(", expression_body, ")"
 ;
 
 identifier = ? any valid C identifier excluding keywords ?;
