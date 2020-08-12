@@ -1,5 +1,7 @@
 # Rubric Markup Language
 
+![GitHub](https://img.shields.io/github/license/JustinHuPrime/RubricMarkupLanguage)
+
 Are you a TA whose professor gives you long, long marking rubrics with complicated scoring calculations? Do you wish you could speed up your grading and turn the rubrics your professor gives you into fill-in-the-blank smart forms? The Rubric Markup Langauge allows you to turn any plain text file into a smart form.
 
 ## Installing
