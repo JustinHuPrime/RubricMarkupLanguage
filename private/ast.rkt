@@ -15,6 +15,10 @@
 (provide KEYWORDS)
 (define KEYWORDS '("config"
                    "newline_collapse"
+                   "number_print_digits"
+                   "print_true_string"
+                   "print_false_string"
+                   "print_out_of_string"
                    "input"
                    "prompt"
                    "to"
@@ -36,7 +40,10 @@
                    "false"))
 (provide CONFIG-OPTIONS)
 (define CONFIG-OPTIONS (hash "newline_collapse" #t
-                             "number_print_digits" 2))
+                             "number_print_digits" 2
+                             "print_true_string" "true"
+                             "print_false_string" "false"
+                             "print_out_of_string" " out of "))
 (provide (struct-out keyword))
 (struct keyword token (name) #:transparent)
 (provide (struct-out punctuation))

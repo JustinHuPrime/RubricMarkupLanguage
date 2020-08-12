@@ -34,7 +34,7 @@
 (provide number->string/limited)
 (define (number->string/limited n digits)
   (let ([decimal-string (number->string (exact->inexact (/ (round (* n (expt 10 digits)))
-                                     (expt 10 digits))))])
+                                                           (expt 10 digits))))])
     (if (string-suffix? decimal-string ".0")
         (substring decimal-string 0 (- (string-length decimal-string) 2))
         decimal-string)))
@@ -53,11 +53,11 @@
                     [(#\\) (loop (cdr str-chars) (list* #\\ #\\ out-chars))]
                     [else (loop (cdr str-chars) (cons (car str-chars) out-chars))])])))
   (cond [(number? value) (number->string/limited value (hash-ref config "number_print_digits"))]
-        [(boolean? value) (if value "true" "false")]
+        [(boolean? value) (if value (hash-ref config "print_true_string") (hash-ref config "print_false_string"))]
         [(string? value) (string-append "\"" (string-escape value) "\"")]
-        [(grade? value) (string-append (number->string/limited (grade-value value) (hash-ref config "number_print_digits"))
-                                       " out of "
-                                       (number->string/limited (grade-out-of value) (hash-ref config "number_print_digits")))]))
+        [else (string-append (number->string/limited (grade-value value) (hash-ref config "number_print_digits"))
+                             (hash-ref config "print_out_of_string")
+                             (number->string/limited (grade-out-of value) (hash-ref config "number_print_digits")))]))
 
 ;; (listof string) -> (listof string)
 (provide collapse-newlines)

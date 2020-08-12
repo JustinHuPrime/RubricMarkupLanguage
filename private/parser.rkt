@@ -130,6 +130,9 @@
                     [(list* #\$ #\{ rest) (values chars
                                                   (+ char-num length-adjustment (length rsf))
                                                   (plain-text line-num char-num (list->string (reverse rsf))))]
+                    [(list* #\$ other rest) (error/nums line-num
+                                                        (+ char-num length-adjustment (length rsf))
+                                                        "expected either $$ or ${")]
                     [(list* c rest) (loop rest (cons c rsf) length-adjustment)])])))
   
   (cond [(null? chars) (values '() char-num #f)]
@@ -169,10 +172,11 @@
     (cond [(null? lines) (values (reverse rsf-lines)
                                  (reverse rsf-line-nums))]
           [else (cond [(blank-line? (car lines))
-                       (loop rsf-lines (cdr lines) (cdr line-nums))]
+                       (loop rsf-lines rsf-line-nums (cdr lines) (cdr line-nums))]
                       [(string-prefix? (car lines) "$#")
-                       (loop rsf-lines (cdr lines) (cdr line-nums))]
-                      [(string-prefix? (car lines) "$")
+                       (loop rsf-lines rsf-line-nums (cdr lines) (cdr line-nums))]
+                      [(and (string-prefix? (car lines) "$")
+                            (not (string-prefix? (car lines) "$$")))
                        (loop (cons (car lines) rsf-lines) (cons (car line-nums) rsf-line-nums) (cdr lines) (cdr line-nums))]
                       [else (values (reverse rsf-lines)
                                     (reverse rsf-line-nums))])])))
@@ -464,7 +468,8 @@
   (let loop ([lines lines]
              [line-nums (build-list (length lines) add1)])
     (cond [(null? lines) (values '() '())]
-          [else (if (or (string-prefix? (car lines) "$")
+          [else (if (or (and (string-prefix? (car lines) "$")
+                             (not (string-prefix? (car lines) "$$")))
                         (blank-line? (car lines)))
                     (loop (cdr lines) (cdr line-nums))
                     (values lines line-nums))])))

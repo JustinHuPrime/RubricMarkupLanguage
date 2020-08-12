@@ -222,13 +222,15 @@
                     [("ceil") (ceiling target)]
                     [("round") (round target)]))]
              [("to_string")
-              (cond [(boolean? target) (if target "true" "false")]
+              (cond [(boolean? target) (if target
+                                           (hash-ref config "print_true_string")
+                                           (hash-ref config "print_false_string"))]
                     [(number? target) (number->string/limited target
                                                               (hash-ref config "number_print_digits"))]
                     [(string? target) target]
                     [else (string-append (number->string/limited (grade-value target)
                                                                  (hash-ref config "number_print_digits"))
-                                         " out of "
+                                         (hash-ref config "print_out_of_string")
                                          (number->string/limited (grade-out-of target)
                                                                  (hash-ref config "number_print_digits")))])]
              [("to_number")
@@ -290,11 +292,21 @@
                                          (case (config-stmt-name (car stmts))
                                            [("newline_collapse")
                                             (if (not (boolean? value))
-                                                (error/locatable (config-stmt-expr (car stmts)) "newline_collapse expects a boolean")
+                                                (error/locatable (config-stmt-expr (car stmts))
+                                                                 "~a expects a boolean"
+                                                                 (config-stmt-name (car stmts)))
                                                 value)]
                                            [("number_print_digits")
                                             (if (not (and (integer? value) (positive? value)))
-                                                (error/locatable (config-stmt-expr (car stmts)) "number_print_digits expects a positive integer")
+                                                (error/locatable (config-stmt-expr (car stmts))
+                                                                 "~a expects a positive integer"
+                                                                 (config-stmt-name (car stmts)))
+                                                value)]
+                                           [("print_true_string" "print_false_string" "print_out_of_string")
+                                            (if (not (string? value))
+                                                (error/locatable (config-stmt-expr (car stmts))
+                                                                 "~a expects a string"
+                                                                 (config-stmt-name (car stmts)))
                                                 value)])))
                              (cdr stmts))]
                       [(input-stmt? (car stmts))
@@ -404,8 +416,25 @@
                                        (loop (cdr exprs)
                                              (cons (plain-text-text (car exprs)) rsf))]
                                       [else
-                                       (loop (cdr exprs)
-                                             (cons (pretty-print (evaluate-expr (car exprs) env config) config) rsf))])]))
+                                       (let ([result (evaluate-expr (car exprs) env config)])
+                                         (cond [(number? result)
+                                                (loop (cdr exprs)
+                                                      (cons (number->string/limited result (hash-ref config "number_print_digits")) rsf))]
+                                               [(boolean? result)
+                                                (loop (cdr exprs)
+                                                      (cons (if result
+                                                                (hash-ref config "print_true_string")
+                                                                (hash-ref config "print_false_string"))
+                                                            rsf))]
+                                               [(string? result)
+                                                (loop (cdr exprs)
+                                                      (cons result rsf))]
+                                               [else
+                                                (loop (cdr exprs)
+                                                      (cons (string-append (number->string/limited (grade-value result) (hash-ref config "number_print_digits"))
+                                                                           (hash-ref config "print_out_of_string")
+                                                                           (number->string/limited (grade-out-of result) (hash-ref config "number_print_digits")))
+                                                            rsf))]))])]))
                        rsf))])))
 
 (define (render-rml lines output-port)

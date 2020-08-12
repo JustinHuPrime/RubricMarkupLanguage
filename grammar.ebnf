@@ -11,7 +11,7 @@ plain_text = ? any text not including "$" but allowing "$$" ? ;
 
 comment = "$#", ? anything excluding newline ? ;
 statement = "$", statement_body ;
-statement_body = "config", "newline_collapse", boolean_literal
+statement_body = "config", ( "newline_collapse" | "number_print_digits" | "print_true_string" | "print_false_string" | "print_out_of_string" ), expression_body
                | "input", type, [ "prompt", expression ], "to", identifier, [ "if", expression_body, "else", expression_body ]
                | "let", identifier, "=", expression_body
 ;
@@ -43,6 +43,8 @@ primary_expression = identifier
                    | "round", "(", expression_body, ")"
                    | "to_string", "(", expression_body, ")"
                    | "to_number", "(", expression_body, ")"
+                   | "out_of", "(", expression_body, ")"
+                   | "score", "(", expression_body, ")"
 ;
 
 identifier = ? any valid C identifier excluding keywords ?;
