@@ -119,24 +119,6 @@
 
 ;; (listof character) number number -> (listof-character) number (or/c token (listof token) #f)
 (define (tokenize/one/body chars line-num char-num)
-  (define (tokenize/string chars line-num char-num)
-    (let loop ([chars (cdr chars)]
-               [rsf '()]
-               [length-adjustment 0])
-      (cond [(null? chars) (error/nums line-num char-num "unterminated string literal")]
-            [else (match chars
-                    [(list* #\" rest) (let ([str (list->string (reverse rsf))])
-                                        (values rest
-                                                (+ char-num 2 length-adjustment (string-length str))
-                                                (literal line-num char-num str)))]
-                    [(list* #\\ #\n rest) (loop rest (cons #\newline rsf) (add1 length-adjustment))]
-                    [(list* #\\ #\t rest) (loop rest (cons #\tab rsf) (add1 length-adjustment))]
-                    [(list* #\\ #\" rest) (loop rest (cons #\" rsf) (add1 length-adjustment))]
-                    [(list* #\\ #\\ rest) (loop rest (cons #\\ rsf) (add1 length-adjustment))]
-                    [(list* #\\ rest) (error/nums line-num
-                                                  (+ char-num 1 length-adjustment (length rsf))
-                                                  "unrecognized escape sequence")]
-                    [(list* c rest) (loop (cdr chars) (cons c rsf) length-adjustment)])])))
   (define (tokenize/plain-text chars line-num char-num)
     (let loop ([chars chars]
                [rsf '()]

@@ -26,10 +26,6 @@
 (require "private/utils.rkt")
 (require "private/common.rkt")
 
-(define (DEBUG-PROBE x)
-  (displayln (format "DEBUG: ~s" x) (current-error-port))
-  x)
-
 ;; expression (hash string any) -> any
 (define (evaluate-expr expr env config)
   (cond [(identifier? expr)
