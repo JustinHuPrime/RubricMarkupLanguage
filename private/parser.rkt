@@ -144,7 +144,7 @@
                                                   [remainder (drop rest (+ code-length 1))])
                                               (values remainder
                                                       (+ char-num 3 code-length)
-                                                      (tokenize code-string line-num (+ char-num 2) tokenize/one/code)))
+                                                      (reverse (tokenize code-string line-num (+ char-num 2) tokenize/one/code))))
                                             (error/nums line-num
                                                         char-num 
                                                         "unterminated code block")))]
@@ -194,7 +194,7 @@
            (values (cdr tokens)
                    (car tokens))]
           [(and (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) "("))
-           (let-values ([(tokens expression) (parse/expression tokens line0)])
+           (let-values ([(tokens expression) (parse/expression (cdr tokens) line0)])
              (cond [(null? tokens)
                     (error/locatable expression "expected a close paren")]
                    [(and (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) ")"))
@@ -208,7 +208,7 @@
              (cond [(null? tokens)
                     (error/locatable operator "expected an open paren after this")]
                    [(and (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) "("))
-                    (let-values ([(tokens target) (parse/expression tokens line0)])
+                    (let-values ([(tokens target) (parse/expression (cdr tokens) line0)])
                       (cond [(null? tokens)
                              (error/locatable target "expected a close paren")]
                             [(and (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) ")"))
@@ -224,14 +224,15 @@
           [else
            (error/locatable (car tokens) "unexpected token")]))
   (define (parse/prefix tokens)
-    (cond [(and (not (null? tokens)) (punctuation? (car tokens)) (member (punctuation-name (car tokens) PREFIX-OPERATORS)))
+    (cond [(and (not (null? tokens)) (punctuation? (car tokens)) (member (punctuation-name (car tokens)) PREFIX-OPERATORS))
            (let ([operator (car tokens)]
                  [tokens (cdr tokens)])
              (cond [(null? tokens)
                     (error/locatable operator "expected an expresison after this")]
                    [else
                     (let-values ([(remainder target) (parse/prefix tokens)])
-                      (values (unary (locatable-line operator)
+                      (values remainder
+                              (unary (locatable-line operator)
                                      (locatable-character operator)
                                      (punctuation-name operator)
                                      target)))]))]
@@ -269,7 +270,7 @@
   
   (let-values ([(tokens logical) (parse/logical tokens)])
     (cond [(and (not (null? tokens)) (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) "?"))
-           (let-values ([(tokens consequent) (parse/expression tokens line0)])
+           (let-values ([(tokens consequent) (parse/expression (cdr tokens) line0)])
              (cond [(null? tokens)
                     (error/locatable consequent "expeted a colon after this")]
                    [(and (punctuation? (car tokens)) (string=? (punctuation-name (car tokens)) ":"))
