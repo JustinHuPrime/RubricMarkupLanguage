@@ -106,7 +106,7 @@
                          (error/locatable expr "cannot compare grades out of different values")
                          (case (binary-operator expr)
                            [("==") (= (grade-value lhs) (grade-value rhs))]
-                           [("!=") (= (grade-value lhs) (grade-value rhs))]))]))]
+                           [("!=") (not (= (grade-value lhs) (grade-value rhs)))]))]))]
            [("<" "<=" ">" ">=")
             (let ([lhs (evaluate-expr (binary-lhs expr)
                                       env
@@ -167,7 +167,7 @@
                                       env
                                       config)])
               (cond [(and (grade? lhs) (number? rhs))
-                     (cond [(< 0 (- (grade-value lhs) rhs))
+                     (cond [(< (- (grade-value lhs) rhs) 0)
                             (error/locatable expr "subtraction would put grade under zero")]
                            [else
                             (grade (- (grade-value lhs) rhs)
